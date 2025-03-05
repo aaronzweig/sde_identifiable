@@ -39,7 +39,7 @@ class NNSDE(MLPSDE):
         sparsity_regularizer="both",
         hidden_size=8,
         activation="sigmoid",
-        init_distribution="uniform",
+        init_distribution="normal",
         init_mode="fan_in",
         gamma=1.0,
         epsilon=1.0,
@@ -64,8 +64,8 @@ class NNSDE(MLPSDE):
         elif activation == "mixed":
 
             # For d=2, gives multiple modes
-            # acts = [lambda x: 3*jnp.cos((x-0.5)*3), lambda x: 2*jnp.sin((x+1.5)*2) - 1]
-            acts = [jax.nn.relu, cursed_act]
+            acts = [lambda x: 3*jnp.cos((x-0.5)*3), lambda x: 2*jnp.sin((x+1.5)*2) - 1]
+            # acts = [jax.nn.relu, cursed_act]
             def mixed_act(x, acts = acts):
                 n = len(acts)
 
@@ -92,7 +92,7 @@ class NNSDE(MLPSDE):
         self.gamma = gamma
 
 
-    def init_param(self, key, d, scale=1e-1, fix_speed_scaling=True):
+    def init_param(self, key, d, scale=1e-2, fix_speed_scaling=True):
         """
         Samples random initialization of the SDE model parameters.
         See :func:`~stadion.inference.KDSMixin.init_param`.
@@ -107,7 +107,7 @@ class NNSDE(MLPSDE):
         }
 
         if self.nonlin is None:
-            self.mono = MonotonicMLP(input_dim = self.hidden_size, hidden_dim=100)
+            self.mono = MonotonicMLP(input_dim = self.hidden_size, hidden_dim=20)
             shape = {**shape, **self.mono.shape}
 
         _initializer = functools.partial(tree_variance_initialization, scale=scale, mode=self.init_mode,
@@ -216,6 +216,7 @@ class NNSDE(MLPSDE):
         warm_start_intv=True,
         weight_decay=0.0001,
         verbose=10,
+        scale=1e-2,
     ):
 
         # convert x and targets into the same format
@@ -229,7 +230,7 @@ class NNSDE(MLPSDE):
 
         # initialize parameters and load to device (replicate across devices)
         key, subk = random.split(key)
-        param = self.init_param(subk, self.n_vars)
+        param = self.init_param(subk, self.n_vars, scale=scale)
 
         ###
         # No interventional param initialized
