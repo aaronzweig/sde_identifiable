@@ -39,7 +39,7 @@ class NNSDE(MLPSDE):
         sparsity_regularizer="both",
         hidden_size=8,
         activation="sigmoid",
-        init_distribution="normal",
+        init_distribution="uniform",
         init_mode="fan_in",
         gamma=1.0,
         epsilon=1.0,
@@ -195,7 +195,7 @@ class NNSDE(MLPSDE):
         l1 = lambda x: jnp.sum(jnp.abs(x))
         reg = l1(param["mlp_0"]) + l1(param["mlp_1"])
         if self.nonlin is None:
-            reg += l1(param["A"]) + l1(param["B"])
+            reg += 0.01 * (l1(param["A"]) + l1(param["B"]))
         return reg
 
 
