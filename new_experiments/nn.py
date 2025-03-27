@@ -102,7 +102,7 @@ class NNSDE(MLPSDE):
             "mlp_0": jnp.zeros((d, self.hidden_size)),
             "mlp_b_0": jnp.zeros((self.hidden_size,)),
             "mlp_1": jnp.zeros((self.hidden_size, d)),
-            # "mlp_b_1": jnp.zeros((d,)),
+            "mlp_b_1": jnp.zeros((d,)),
             "log_reversion": jnp.zeros((d,)),
         }
 
@@ -161,7 +161,7 @@ class NNSDE(MLPSDE):
 
         z = self.gamma * act(x @ param["mlp_0"] + param["mlp_b_0"])
         x_out = z @ param["mlp_1"]
-        # x_out += param["mlp_b_1"]
+        x_out += param["mlp_b_1"]
         f_vec = x_out - x @ jnp.diag(jnp.exp(param["log_reversion"]))
         # f_vec = x_out - x
 

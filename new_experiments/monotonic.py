@@ -28,7 +28,8 @@ class MonotonicMLP():
         # z = jnp.abs(B) * z + c
         # z = self.act(z)
         # z = jnp.abs(A) * z
-        z = jnp.sum(z, axis=-1) + d
+        # z = jnp.sum(z, axis=-1) + d
+        z = jnp.sum(z, axis=-1)
         z = z + 0.01*self.act(x)
         assert z.shape == x.shape
         return z

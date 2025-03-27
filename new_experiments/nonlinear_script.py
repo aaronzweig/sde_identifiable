@@ -48,7 +48,7 @@ def initialize_model(key, model, d):
     # param["mlp_1"] = sample_stiefel(subk2, d, r).T
     
     param["mlp_b_0"] *= 0
-    # param["mlp_b_1"] *= 0
+    param["mlp_b_1"] *= 0
     model.param = param
     return key, model, param
 
