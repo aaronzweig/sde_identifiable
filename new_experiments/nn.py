@@ -52,6 +52,9 @@ class NNSDE(MLPSDE):
         self.sparsity_regularizer = sparsity_regularizer
 
         cursed_act = lambda x: 1./3. * (jax.nn.leaky_relu(x, 0.1) + jax.nn.leaky_relu(x - 1, 0.2) + jax.nn.leaky_relu(x + 1, 0.3))
+        tanh = lambda x: 2 * jax.nn.sigmoid(2 * x) - 1
+        # wiggle_act = lambda x: 1./3. * (tanh(3*x-5) + tanh(3*x) + tanh(3*x+5))
+        wiggle_act = lambda x: 1./5. * (tanh(3*x-5)  + tanh(3*x-5) + tanh(3*x) + tanh(3*x+5) + tanh(3*x+10))
 
         if activation == "tanh":
             self.nonlin = jnp.tanh
@@ -59,6 +62,8 @@ class NNSDE(MLPSDE):
             self.nonlin = jax.nn.relu
         elif activation == "sigmoid":
             self.nonlin = jax.nn.sigmoid
+        elif activation == "wiggle":
+            self.nonlin = wiggle_act
         elif activation == "cursed":
             self.nonlin = cursed_act
         elif activation == "mixed":
