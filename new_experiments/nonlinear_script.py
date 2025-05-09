@@ -24,12 +24,13 @@ def sample_stiefel(key, n, m):
     Z = X @ jnp.linalg.inv(jax.scipy.linalg.sqrtm(X.T @ X))
     return jnp.real(Z)
 
-def build_model(hidden_size, activation, epsilon, gamma, n_samples_burnin):
+def build_model(hidden_size, activation, epsilon, gamma, n_samples_burnin, mono):
     model = NNSDE(
         hidden_size = hidden_size, 
         activation=activation,
         epsilon = epsilon,
         gamma = gamma,
+        mono = mono,
         sde_kwargs = {"n_samples_burnin": n_samples_burnin})
     return model
 
@@ -143,14 +144,14 @@ def run_model():
     config = wandb.config
     key = random.PRNGKey(config.seed)
 
-    true_model = build_model(config.r, config.activation, config.epsilon, config.gamma, config.n_samples_burnin)
+    true_model = build_model(config.r, config.activation, config.epsilon, config.gamma, config.n_samples_burnin, mono=False)
     key, true_model, param = initialize_model(key, true_model, config.d)
     
     key, intv_param, datasets, targets = build_data(key, true_model, config.d, config.n_envs, config.intv_scale, config.n)
     key, test_intv_param, test_datasets, test_targets = build_data(key, true_model, config.d, config.n_test_envs, config.intv_scale, config.n)
 
 
-    model = build_model(config.model_hidden_size, config.model_activation, config.epsilon, config.gamma, config.n_samples_burnin)
+    model = build_model(config.model_hidden_size, config.model_activation, config.epsilon, config.gamma, config.n_samples_burnin, config.mono)
     key, model = fit_model(key, model, datasets, targets, intv_param, config.bandwidth, config.steps, config.estimator, config.reg, config.learning_rate, config.weight_decay, config.scale)
 
     if config.val_metric == "mean":

@@ -5,7 +5,7 @@ from jax import vmap, random
 import jax.numpy as jnp
 
 class MonotonicMLP():
-    def __init__(self, input_dim, hidden_dim = 10, act = jax.nn.sigmoid):
+    def __init__(self, input_dim, hidden_dim = 10, act = jax.nn.sigmoid, mono = False):
 
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
@@ -16,19 +16,21 @@ class MonotonicMLP():
             "c": jnp.zeros((hidden_dim)),
             "d": jnp.zeros((input_dim))
         }
+        self.mono = mono
 
     def forward(self, x, param):
         A, B, c, d = param["A"], param["B"], param["c"][None], param["d"]
         
         z = x[:,None]
-        
-        z = B * z + c
-        z = self.act(z)
-        z = A * z
-        # z = jnp.abs(B) * z + c
-        # z = self.act(z)
-        # z = jnp.abs(A) * z
-        # z = jnp.sum(z, axis=-1) + d
+
+        if not self.mono:
+            z = B * z + c
+            z = self.act(z)
+            z = A * z
+        else:
+            z = jnp.abs(B) * z + c
+            z = self.act(z)
+            z = jnp.abs(A) * z
         z = jnp.sum(z, axis=-1)
         z = z + 0.01*self.act(x)
         assert z.shape == x.shape

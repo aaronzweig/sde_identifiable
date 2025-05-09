@@ -41,6 +41,7 @@ class NNSDE(MLPSDE):
         activation="sigmoid",
         init_distribution="uniform",
         init_mode="fan_in",
+        mono=False,
         gamma=1.0,
         epsilon=1.0,
         sde_kwargs=None,
@@ -50,11 +51,12 @@ class NNSDE(MLPSDE):
         SDE.__init__(self, **sde_kwargs)
 
         self.sparsity_regularizer = sparsity_regularizer
+        self.mono = mono
 
         cursed_act = lambda x: 1./3. * (jax.nn.leaky_relu(x, 0.1) + jax.nn.leaky_relu(x - 1, 0.2) + jax.nn.leaky_relu(x + 1, 0.3))
         tanh = lambda x: 2 * jax.nn.sigmoid(2 * x) - 1
         # wiggle_act = lambda x: 1./3. * (tanh(3*x-5) + tanh(3*x) + tanh(3*x+5))
-        wiggle_act = lambda x: 1./5. * (tanh(3*x-5)  + tanh(3*x-5) + tanh(3*x) + tanh(3*x+5) + tanh(3*x+10))
+        wiggle_act = lambda x: 1./5. * (tanh(x-5) + tanh(3*x-5) + tanh(x) + tanh(3*x+5) + tanh(3*x+10))
 
         if activation == "tanh":
             self.nonlin = jnp.tanh
@@ -62,7 +64,7 @@ class NNSDE(MLPSDE):
             self.nonlin = jax.nn.relu
         elif activation == "sigmoid":
             self.nonlin = jax.nn.sigmoid
-        elif activation == "wiggle":
+        elif activation == "wiggle_diff":
             self.nonlin = wiggle_act
         elif activation == "cursed":
             self.nonlin = cursed_act
@@ -112,7 +114,7 @@ class NNSDE(MLPSDE):
         }
 
         if self.nonlin is None:
-            self.mono = MonotonicMLP(input_dim = self.hidden_size, hidden_dim=20)
+            self.mono = MonotonicMLP(input_dim = self.hidden_size, hidden_dim=20, mono=self.mono)
             shape = {**shape, **self.mono.shape}
 
         _initializer = functools.partial(tree_variance_initialization, scale=scale, mode=self.init_mode,
