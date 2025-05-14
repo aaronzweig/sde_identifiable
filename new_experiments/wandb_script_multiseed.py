@@ -11,7 +11,7 @@ sweep_configuration = {
         "r": {"values": [3]},
         "n_envs": {"values": [10]},
         "n_test_envs": {"values": [20]},
-        "epsilon": {"values": [0.1]},
+        "epsilon": {"values": [0.05]},
         "gamma": {"values": [0.98]},
         "activation": {"values": ["mixed"]},
         "steps": {"values": [50000]},
