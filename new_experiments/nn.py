@@ -56,7 +56,9 @@ class NNSDE(MLPSDE):
         cursed_act = lambda x: 1./3. * (jax.nn.leaky_relu(x, 0.1) + jax.nn.leaky_relu(x - 1, 0.2) + jax.nn.leaky_relu(x + 1, 0.3))
         tanh = lambda x: 2 * jax.nn.sigmoid(2 * x) - 1
         # wiggle_act = lambda x: 1./3. * (tanh(3*x-5) + tanh(3*x) + tanh(3*x+5))
-        wiggle_act = lambda x: 1./5. * (tanh(x-5) + tanh(3*x-5) + tanh(x) + tanh(3*x+5) + tanh(3*x+10))
+        # wiggle_act = lambda x: 1./5. * (tanh(x-5) + tanh(3*x-5) + tanh(x) + tanh(3*x+5) + tanh(3*x+10))
+        # wiggle_act = lambda x: 1./4. * (tanh(2*x-2) + tanh(3*x-2) + tanh(3*x+2) + tanh(3*x+4))
+        wiggle_act = lambda x: tanh(3*x+8) + tanh(7*x-2) + tanh(9*x+2) + tanh(3*x+4) + tanh(3*x-12)
 
         if activation == "tanh":
             self.nonlin = jnp.tanh
