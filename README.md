@@ -18,5 +18,11 @@ python wandb_script_multiseed.py
 ```
 
 # Reference
-
-TODO:
+```
+@article{zweig2025towards,
+  title={Towards Identifiability of Interventional Stochastic Differential Equations},
+  author={Zweig, Aaron and Lin, Zaikang and Azizi, Elham and Knowles, David},
+  journal={arXiv preprint arXiv:2505.15987},
+  year={2025}
+}
+```
