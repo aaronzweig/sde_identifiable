@@ -10,6 +10,16 @@ from scipy.linalg import solve_continuous_lyapunov, svd
 import matplotlib.pyplot as plt
 import numpy as np
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 class LinearSDE(nn.Module):
 
     def __init__(self, n, r, decay = None):
@@ -112,7 +122,9 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--n', type=int, required=True)
-    parser.add_argument('--redraws', type=int, default=30)
+    parser.add_argument('--redraws', type=int, default=100)
+    parser.add_argument("--fix_decay", type=str2bool, nargs='?',
+                        const=True, default=False)
 
     args = parser.parse_args()
 
@@ -121,8 +133,7 @@ def main():
     gamma = 0.9
     samples = 5
     rs = [5, 10]
-    # fix_decay = True
-    fix_decay = False
+    fix_decay = args.fix_decay
     redraws = args.redraws
 
     errors = []
