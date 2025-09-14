@@ -219,20 +219,39 @@ def train(model, C, means, covs, lr = 0.001, iterations = 500):
 import itertools
 import numpy as np
 
-def permuted_error(A, A_star):
-    perms = list(itertools.permutations(range(A.shape[1])))
+# def permuted_error(A, A_star):
+#     perms = list(itertools.permutations(range(A.shape[1])))
 
-    A /= np.linalg.norm(A, axis = 0, keepdims = True)
-    A *= np.sign(np.sum(A, axis = 0, keepdims = True))
-    A_star /= np.linalg.norm(A_star, axis = 0, keepdims = True)
-    A_star *= np.sign(np.sum(A_star, axis = 0, keepdims = True))
+#     A /= np.linalg.norm(A, axis = 0, keepdims = True)
+#     A *= np.sign(np.sum(A, axis = 0, keepdims = True))
+#     A_star /= np.linalg.norm(A_star, axis = 0, keepdims = True)
+#     A_star *= np.sign(np.sum(A_star, axis = 0, keepdims = True))
     
+#     errors = []
+#     for perm in perms:
+#         A_perm = A_star[:, perm]
+#         err = np.linalg.norm(A - A_perm)
+#         errors.append(err)
+    
+#     return min(errors) / np.linalg.norm(A_star)
+
+
+def permuted_error(A, A_star):
+    A = A / np.linalg.norm(A, axis=0, keepdims=True)
+    A_star = A_star / np.linalg.norm(A_star, axis=0, keepdims=True)
+
+    perms = list(itertools.permutations(range(A.shape[1])))
     errors = []
+
     for perm in perms:
         A_perm = A_star[:, perm]
-        err = np.linalg.norm(A - A_perm)
+
+        flips = np.sign((A * A_perm).sum(axis=0, keepdims=True))
+        A_flipped = A_perm * flips
+
+        err = np.linalg.norm(A - A_flipped)
         errors.append(err)
-    
+
     return min(errors) / np.linalg.norm(A_star)
 
 
@@ -270,8 +289,8 @@ def main():
     verbose = args.verbose
     
     n_runs = args.n_runs
-    lr = 0.0005
-    iterations = 30000
+    lr = 0.002
+    iterations = 10000
 
     true_model = FullSDE(n=n, r=r, gamma=gamma, act=nn.Sigmoid(), ep=ep)
     true_model.to('cuda')
