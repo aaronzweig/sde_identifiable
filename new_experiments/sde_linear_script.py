@@ -130,6 +130,7 @@ def main():
 
     n = args.n
     np.random.seed(42)
+    torch.manual_seed(42)
     gamma = 0.9
     samples = 5
     rs = [5, 10]

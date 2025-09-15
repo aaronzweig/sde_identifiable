@@ -289,7 +289,7 @@ def main():
     verbose = args.verbose
     
     n_runs = args.n_runs
-    lr = 0.002
+    lr = 0.001
     iterations = 10000
 
     true_model = FullSDE(n=n, r=r, gamma=gamma, act=nn.Sigmoid(), ep=ep)
