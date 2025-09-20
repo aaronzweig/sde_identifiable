@@ -270,6 +270,10 @@ def main():
                         const=True, default=False)
     parser.add_argument("--ep", type=float, default=1e-5)
     parser.add_argument("--hidden_dim", type=int, default=10)
+    parser.add_argument("--lr", type=float, default=0.001)
+    parser.add_argument("--iterations", type=int, default=10000)
+    parser.add_argument("--gamma", type=float, default=0.995)
+    parser.add_argument("--c_scale", type=float, default=0.3)
 
     args = parser.parse_args()
 
@@ -278,9 +282,9 @@ def main():
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     n = 8
-    gamma = 0.995
-    n_samples = args.n_samples
     r = 2
+    gamma = args.gamma
+    n_samples = args.n_samples
     k = args.k
     ep = args.ep
     hidden_dim = args.hidden_dim
@@ -289,8 +293,8 @@ def main():
     verbose = args.verbose
     
     n_runs = args.n_runs
-    lr = 0.001
-    iterations = 10000
+    lr = args.lr
+    iterations = args.iterations
 
     true_model = FullSDE(n=n, r=r, gamma=gamma, act=nn.Sigmoid(), ep=ep)
     true_model.to('cuda')
@@ -298,7 +302,7 @@ def main():
     A_true = true_model.A.detach().cpu().numpy()
     B_true = true_model.B.detach().cpu().numpy().T
     
-    C = 0.3 * torch.randn(k, n).to('cuda')
+    C = args.c_scale * torch.randn(k, n).to('cuda')
     samples, means, covs = generate_data(true_model, C, n_samples)
     del samples
 
