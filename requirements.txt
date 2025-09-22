@@ -9,3 +9,7 @@ tensorflow_datasets>=4.3.0
 wandb
 stadion
 pot
+tqdm
+torch
+torchsde
+matplotlib
