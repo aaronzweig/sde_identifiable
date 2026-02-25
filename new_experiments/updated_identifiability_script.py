@@ -88,15 +88,6 @@ class FullSDE(nn.Module):
             nn.init.xavier_uniform_(self.B)
             self.A /= torch.linalg.norm(self.A, ord = 2)
             self.B /= torch.linalg.norm(self.B, ord = 2)
-            ############################################################
-            if act is not None: #try sparse sampling
-                # self.A = torch.nn.Parameter(torch.eye(n, r)[torch.randperm(n)])
-                # self.B = torch.nn.Parameter(torch.eye(r, n)[:,torch.randperm(n)])
-                A = torch.from_numpy(sample_stiefel(n,r)).float()
-                B = torch.from_numpy(sample_stiefel(n,r)).float().T
-                self.A = torch.nn.Parameter(A)
-                self.B = torch.nn.Parameter(B)
-            ############################################################
 
     def drift(self, x):
         # x: (batch, n)
@@ -288,7 +279,9 @@ def main():
     k = args.k
     ep = args.ep
     hidden_dim = args.hidden_dim
-    learned_act = True
+    learned_act = False
+
+    true_act = lambda x: 0.7 * x + 0.3 * F.tanh(x)
 
     verbose = args.verbose
     
@@ -296,7 +289,7 @@ def main():
     lr = args.lr
     iterations = args.iterations
 
-    true_model = FullSDE(n=n, r=r, gamma=gamma, act=nn.Sigmoid(), ep=ep)
+    true_model = FullSDE(n=n, r=r, gamma=gamma, act=true_act, ep=ep)
     true_model.to('cuda')
     
     A_true = true_model.A.detach().cpu().numpy()
@@ -322,10 +315,10 @@ def main():
     
         if i == 0:
             # print("first run is just against true model")
-            model = FullSDE(n=n, r=r, gamma=gamma, act=nn.Sigmoid(), ep=ep)
+            model = FullSDE(n=n, r=r, gamma=gamma, act=true_act, ep=ep)
             model.load_state_dict(true_model.state_dict())
         else:
-            act = None if learned_act else nn.Sigmoid()
+            act = None if learned_act else true_act
             model = FullSDE(n=n, r=r, gamma=gamma, act=act, ep=ep, hidden_dim=hidden_dim)
         model.to('cuda')
         
